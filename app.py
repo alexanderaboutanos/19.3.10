@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash
+from flask import Flask, render_template, request, redirect, flash, session
 
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import *
@@ -13,6 +13,11 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS']=False
 def start_page():
     survey_obj = satisfaction_survey
     return render_template('start.html', survey_obj=survey_obj)
+
+@app.route('/new_route', methods=["POST"])
+def new_route():
+    session["responses"] = []
+    return redirect('/questions/1')
 
 @app.route('/questions/<num>')
 def questions(num):
@@ -33,6 +38,11 @@ def questions(num):
 def answer(num):
     button_answer = request.form["button"]
     responses.append(button_answer)
+
+    response_list = session["responses"]
+    response_list.append(f"{button_answer}")
+    session["responses"] = response_list
+
     next_q = int(num)+1
     print(responses)
     if next_q > len(satisfaction_survey.questions):
